@@ -1,4 +1,7 @@
-from api.db.models import Ticket, Message, User
+from fastapi import UploadFile
+from typing import Optional
+
+from api.db.models import Ticket, Message, User, Image
 from api.db.models.messages import MessageSender
 from api.services.base import BaseService
 from api.services.user import UserService
@@ -8,15 +11,20 @@ from config import settings
 class TicketService:
     model = Ticket
 
-    async def create(self, user: User, title: str, content: str) -> dict:
+    async def create(self, user: User, title: str, content: str, file: Optional[UploadFile] = None) -> dict:
         from api.services.messages import MessageService
+        from api.services.images import ImageService
         if not content:
             return {
                 'status': 'error',
                 'description': f'Content not found',
             }
         ticket = await BaseService().create(self.model, title=title, user_id=user.id)
-        message = await BaseService().create(Message, ticket_id=ticket.id, sender=MessageSender.USER, content=content)
+        if file:
+            image = await ImageService().create(file=file)
+            message = await BaseService().create(Message, ticket_id=ticket.id, sender=MessageSender.USER, content=content, image_id=image['image_id'])
+        else:
+            message = await BaseService().create(Message, ticket_id=ticket.id, sender=MessageSender.USER, content=content)
         return {
             'status': 'ok',
             'ticket': await self.generate_ticket_dict(ticket=ticket),

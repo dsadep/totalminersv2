@@ -1,14 +1,16 @@
+from typing import Optional
 from api.db.models import Message, User, Ticket
 from api.db.models.messages import MessageSender
 from api.services.base import BaseService
 from api.services.ticket import TicketService
+from api.services.images import ImageService
 from config import settings
 
 
 class MessageService:
     model = Message
 
-    async def create(self, user: User, ticket_id: int, content: str) -> dict:
+    async def create(self, user: User, ticket_id: int, content: str, image_id: Optional[int]) -> dict:
         if not content:
             return {
                 'status': 'error',
@@ -20,7 +22,7 @@ class MessageService:
                 'status': 'error',
                 'description': f'Ticket #{ticket_id} not found',
             }
-        await BaseService().create(self.model, ticket_id=ticket.id, sender=MessageSender.USER, content=content)
+        await BaseService().create(self.model, ticket_id=ticket.id, sender=MessageSender.USER, content=content, image_id=image_id)
         return {
             'status': 'ok',
             'messages': [
@@ -53,6 +55,7 @@ class MessageService:
             'ticket': await TicketService().generate_ticket_dict(ticket=message.ticket),
             'sender': message.sender,
             'content': message.content,
+            'image': await ImageService().generate_image_dict(image=message.image) or None,
             'date': message.created_at.strftime('%d.%m.%Y'),
             'time': message.created_at.strftime('%H:%M'),
             'created': message.created_at.strftime(format=settings.date_time_format),

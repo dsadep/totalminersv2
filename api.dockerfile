@@ -6,4 +6,3 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt
 COPY . /app
 WORKDIR /app
 
-RUN alembic upgrade head

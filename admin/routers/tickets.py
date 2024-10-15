@@ -45,5 +45,7 @@ def ticket_page_post(id: int):
     ticket = basic_get(Ticket, id=id)
     if not ticket:
         redirect(url_for('tickets_router.index'))
+    from pprint import pprint
+    pprint(request.form)
     basic_create(Message, ticket_id=ticket.id, sender=MessageSender.ADMIN, content=request.form.get('msg'))
     return redirect(url_for('tickets_router.ticket_page', id=ticket.id))
