@@ -50,6 +50,9 @@
                             - {{ message.created }}
                         </a>
                         <p>{{ message.content }}</p>
+                        {% if message.image %}
+                          <a href="{{message.image.url}}">Файл</a>
+                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
@@ -59,6 +62,7 @@
                         <div class="d-flex justify-content-left">
                             <div class="input-group">
                                 <input type="text" class="form-control" name="msg" placeholder="Сообщение"/>
+                                <input type="file" class="form-control-file p-2" name="file">
                                 <input type="submit" id="button-addon1" class="btn btn-primary">
                             </div>
                         </div>
