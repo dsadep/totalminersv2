@@ -1,0 +1,14 @@
+fastapi
+pydantic[email]
+pydantic_settings
+pyotp
+alembic
+sqlalchemy
+asyncpg
+PyJWT
+aiohttp
+retry
+passlib
+psycopg2-binary
+apscheduler
+python-multipart==0.0.10

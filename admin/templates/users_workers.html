@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div style="color:red;">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <table class="table">
+        <h1>Воркеры пользователя {{ user.email }}</h1>
+        <a href="{{ url_for('workers_router.create_boundary', id=user.id) }}" class="btn btn-success rounded-pill">
+            Добавить Boundary
+        </a>
+        <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Название</th>
+            <th scope="col">Тип</th>
+            <th scope="col">Товар</th>
+            <th scope="col">Статус</th>
+            <th scope="col">Скрыт</th>
+            <th scope="col">Действие</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for worker in workers %}
+            <tr>
+                <th>
+                    <a href="{{ url_for('workers_router.worker_page', worker_id=worker.id) }}">{{ worker.id_str }}</a>
+                </th>
+                <th>
+                    <a href="{{ url_for('workers_router.worker_page', worker_id=worker.id) }}">{{ worker.name }}</a>
+                </th>
+                <th>{{ worker.behavior }}</th>
+                <th>{{ worker.miner_item.id }} - {{ worker.miner_item.name }}</th>
+                <th>{{ worker.status }}</th>
+                <th>{% if worker.hidden %} Скрыт {% else %} Не скрыт {% endif %}</th>
+                <th>
+                    {% if worker.behavior == 'boundary' and worker.status != 'off' %}
+                        <form action="{{ url_for('workers_router.delete_worker', id=user.id) }}">
+                            <input type="hidden" name="worker_id" value="{{ worker.id }}">
+                            <input type="submit" class="btn btn-danger rounded-pill px-3" value="Удалить">
+                        </form>
+                    {% endif %}
+                </th>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

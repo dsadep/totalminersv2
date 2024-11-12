@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Название</th>
+        <th scope="col">Пользователь</th>
+        <th scope="col">Состояние</th>
+        <th scope="col">Действие</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for ticket in tickets %}
+    <tr>
+        <th>{{ticket.id}}</th>
+        <th>{{ticket.title}}</th>
+        <th>{{ticket.user.email}}</th>
+        <th>{% if ticket.is_open %}Открыт{% else %}Закрыт{% endif %}</th>
+        <th>
+            <form action="{{url_for('tickets_router.ticket_page', id=ticket.id)}}">
+                <button class="btn btn-primary rounded-pill px-3" type="submit">Просмотреть</button>
+            </form>
+        </th>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
