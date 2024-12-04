@@ -13,9 +13,8 @@ router = APIRouter(
 class TicketCreateSchema(BaseModel):
     title: str
     text: str
-    file: Optional[UploadFile]
 
 @router.post('')
 async def route(schema: TicketCreateSchema, user=Depends(get_current_user)):
-    result = await TicketService().create(user=user, title=schema.title, content=schema.text, file=schema.file)
+    result = await TicketService().create(user=user, title=schema.title, content=schema.text)
     return result
