@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, UploadFile, File
 from pydantic import BaseModel
 
 from api.services.messages import MessageService
@@ -14,8 +14,7 @@ router = APIRouter(
 class TicketMessageCreateSchema(BaseModel):
     ticket_id: int
     text: str
-    file: Optional[UploadFile]
-
+    file: Optional[UploadFile] = File(None)
 
 @router.post('')
 async def route(schema: TicketMessageCreateSchema, user=Depends(get_current_user)):

@@ -10,7 +10,7 @@ from config import settings
 class MessageService:
     model = Message
 
-    async def create(self, user: User, ticket_id: int, content: str, image_id: Optional[int]) -> dict:
+    async def create(self, user: User, ticket_id: int, content: str, image_id: Optional[int] = None) -> dict:
         if not content:
             return {
                 'status': 'error',
