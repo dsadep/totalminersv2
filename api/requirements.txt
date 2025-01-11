@@ -12,3 +12,4 @@ passlib
 psycopg2-binary
 apscheduler
 python-multipart==0.0.10
+aiofiles

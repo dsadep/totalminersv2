@@ -1,0 +1,17 @@
+[
+  {"name": "United States", "short_code": "US"},
+  {"name": "Canada", "short_code": "CA"},
+  {"name": "United Kingdom", "short_code": "GB"},
+  {"name": "Australia", "short_code": "AU"},
+  {"name": "Germany", "short_code": "DE"},
+  {"name": "France", "short_code": "FR"},
+  {"name": "India", "short_code": "IN"},
+  {"name": "Japan", "short_code": "JP"},
+  {"name": "Brazil", "short_code": "BR"},
+  {"name": "South Africa", "short_code": "ZA"},
+  {"name": "Mexico", "short_code": "MX"},
+  {"name": "Italy", "short_code": "IT"},
+  {"name": "Spain", "short_code": "ES"},
+  {"name": "Russia", "short_code": "RU"},
+  {"name": "China", "short_code": "CN"}
+]

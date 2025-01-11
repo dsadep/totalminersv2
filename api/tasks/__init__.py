@@ -9,6 +9,7 @@ from api.tasks.hostings.every_day import task_hosting_every_day
 from api.tasks.hostings.every_month import task_hosting_every_month
 from api.tasks.payments.every_day import task_payment_every_day
 from api.tasks.workers.check import task_worker_check
+from api.tasks.countries.every_start import insert_countries_if_not_exists 
 from logger import config_logger
 
 TASKS = []
@@ -29,6 +30,14 @@ TASKS.extend([
 async def start_app_tasks() -> None:
     config_logger()
     scheduler = AsyncIOScheduler()
+    """
+    COUNTRIES
+    """
+    scheduler.add_job(
+        func=insert_countries_if_not_exists,
+        trigger='date', 
+        run_date=datetime.datetime.now(),
+    )
     """
     HOSTING
     """
