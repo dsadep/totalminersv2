@@ -41,15 +41,16 @@ def miner_page(id: int):
     )
 
 
+
 @miners_router.post('/miners/<id>/')
 @auth_required
 def miner_page_post(id: int):
     miner_item = basic_get(MinerItem, id=id)
-    price = float(request.form.get('price', 0))
-    income = float(request.form.get('income', 0))
-    hosting = float(request.form.get('hosting', 0))
-    profit = float(request.form.get('profit', 0))
-    discount_value = float(request.form.get('discount_value', 0))
+    price = float(request.form.get('price', '')) if request.form.get('price', '') else 0.0
+    income = float(request.form.get('income', '')) if request.form.get('income', '') else 0.0
+    hosting = float(request.form.get('hosting', '')) if request.form.get('hosting', '') else 0.0
+    profit = float(request.form.get('profit', '')) if request.form.get('profit', '') else 0.0
+    discount_value = float(request.form.get('discount_value', '')) if request.form.get('discount_value', '') else 0.0
     image_id = miner_item.image_id
     logging.critical(request.files.get('image'))
     if request.files.get('image'):
