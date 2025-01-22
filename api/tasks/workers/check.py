@@ -41,4 +41,6 @@ async def task_worker_check():
             await function()
         except Exception as e:
             logging.critical(f'Exception \n {e}')
-        await asyncio.sleep(6 * 60 * 60)
+        # Old timing: await asyncio.sleep(6 * 60 * 60)
+        # New:
+        await asyncio.sleep(15 * 60)
