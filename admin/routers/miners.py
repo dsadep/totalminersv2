@@ -51,6 +51,7 @@ def miner_page_post(id: int):
     hosting = float(request.form.get('hosting', '')) if request.form.get('hosting', '') else 0.0
     profit = float(request.form.get('profit', '')) if request.form.get('profit', '') else 0.0
     discount_value = float(request.form.get('discount_value', '')) if request.form.get('discount_value', '') else 0.0
+    discount_count = float(request.form.get('discount_count', '')) if request.form.get('discount_count', '') else 0.0
     image_id = miner_item.image_id
     logging.critical(request.files.get('image'))
     if request.files.get('image'):
@@ -74,7 +75,7 @@ def miner_page_post(id: int):
         income=value_to_int(value=income, decimal=settings.usd_decimal),
         hosting=value_to_int(value=hosting, decimal=settings.usd_decimal),
         profit=value_to_int(value=profit, decimal=settings.usd_decimal),
-        discount_count=int(request.form.get('discount_count', 0)),
+        discount_count=int(discount_count),
         discount_value=value_to_int(value=discount_value, decimal=settings.rate_decimal),
         priority=int(request.form.get('priority')),
         is_hidden=request.form.get('ishidden') == 'on',
@@ -105,11 +106,12 @@ def new_miner_page():
 @miners_router.post('/miners/new')
 @auth_required
 def new_miner_page_post():
-    price = float(request.form.get('price', 0))
-    income = float(request.form.get('income', 0))
-    hosting = float(request.form.get('hosting', 0))
-    profit = float(request.form.get('profit', 0))
-    discount_value = float(request.form.get('discount_value', 0))
+    price = float(request.form.get('price', '')) if request.form.get('price', '') else 0.0
+    income = float(request.form.get('income', '')) if request.form.get('income', '') else 0.0
+    hosting = float(request.form.get('hosting', '')) if request.form.get('hosting', '') else 0.0
+    profit = float(request.form.get('profit', '')) if request.form.get('profit', '') else 0.0
+    discount_value = float(request.form.get('discount_value', '')) if request.form.get('discount_value', '') else 0.0
+    discount_count = float(request.form.get('discount_count', '')) if request.form.get('discount_count', '') else 0.0
     file = request.files['image']
     extension = file.filename.split('.')[-1]
     path = f'{settings.image_dir}/{token_hex(8)}_{time.strftime("%Y%m%d%H%M")}.{extension}'
@@ -127,7 +129,7 @@ def new_miner_page_post():
         income=value_to_int(value=income, decimal=settings.usd_decimal),
         hosting=value_to_int(value=hosting, decimal=settings.usd_decimal),
         profit=value_to_int(value=profit, decimal=settings.usd_decimal),
-        discount_count=int(request.form.get('discount_count')),
+        discount_count=int(discount_count),
         discount_value=value_to_int(value=discount_value, decimal=settings.rate_decimal),
         priority=int(request.form.get('priority')),
         is_hidden=False,
