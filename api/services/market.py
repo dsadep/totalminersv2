@@ -66,9 +66,9 @@ class MarketService:
                 miner_id=market_cart.miner_item_id,
                 is_active=True
             )
-            for discount in personal_discounts:
-                if discount.expiration_date > datetime.now():
-                    discount += miner_sum * discount.discount_percentage
+            for user_discount in personal_discounts:
+                if user_discount.expiration_date > datetime.now():
+                    discount += miner_sum * user_discount.discount_percentage
             count += market_cart.count
             summary += miner_sum
         summary = value_to_float(value=summary, decimal=settings.usd_decimal, round_value=2)

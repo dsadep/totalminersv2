@@ -14,6 +14,4 @@ class Discount(Model):
     is_active = Column(Boolean, default=True)
     expiration_date = Column(DateTime, nullable=True) 
 
-    user = relationship("User", back_populates="discounts", cascade='all, delete-orphan')
-    miner = relationship("MinerItem", back_populates="discounts", cascade='all, delete-orphan')
-
+    user = relationship("User", back_populates="discounts", cascade='all')
