@@ -1,7 +1,8 @@
+from datetime import datetime
 import logging
 
 from api.db.models import MinerItem, User, BuyRequest, BuyRequestMinerItem, Billing, \
-    BillingTypes, BillingBuyRequest, BillingStates, MarketCart, BillingPaymentTypes, BillingCurrencies
+    BillingTypes, BillingBuyRequest, BillingStates, MarketCart, BillingPaymentTypes, BillingCurrencies, Discount
 from api.modules.bybit import get_bybit_rub
 from api.modules.headframe import headframe_api
 from api.services.base import BaseService
@@ -51,12 +52,23 @@ class MarketService:
                 'count': market_cart.count,
             })
             miner_sum = market_cart.miner_item.price * market_cart.count
+            # Processing deafult discounts (linked to miner items)
             if market_cart.count >= market_cart.miner_item.discount_count:
                 discount_value = value_to_float(
                     value=market_cart.miner_item.discount_value,
                     decimal=settings.rate_decimal,
                 )
                 discount += miner_sum * (discount_value / 100)
+            # Processing personal discounts (linked to user)
+            personal_discounts = await BaseService().get_all(
+                Discount,
+                user_id=user.id,
+                miner_id=market_cart.miner_item_id,
+                is_active=True
+            )
+            for discount in personal_discounts:
+                if discount.expiration_date > datetime.now():
+                    discount += miner_sum * discount.discount_percentage
             count += market_cart.count
             summary += miner_sum
         summary = value_to_float(value=summary, decimal=settings.usd_decimal, round_value=2)
