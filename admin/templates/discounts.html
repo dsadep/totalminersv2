@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<a href="{{url_for('discounts_router.new_discount_form')}}" class="btn btn-success rounded-pill px-3">New discount</a>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">ID</th>
+        <th scope="col">User ID</th>
+        <th scope="col">Miner ID</th>
+        <th scope="col">For energy?</th>
+        <th scope="col">Discount %</th>
+        <th scope="col">Is active</th>
+        <th scope="col">Expires</th>
+        <th scope="col">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for discount in discounts %}
+    <tr>
+        <th>{{discount.id}}</th>
+        <th>{{discount.user_id}}</th>
+        <th>{{discount.miner_id}}</th>
+        <th>{% if discount.applies_to_electricity %}YES{% else %}NO{% endif %}</th>
+        <th>{{discount.discount_percentage * 100}}</th>
+        <th>{% if discount.is_active %}YES{% else %}NO{% endif %}</th>
+        <th>{{discount.expiration_date}}</th>
+        <th>
+            <form method="POST" action="{{url_for('discounts_router.delete_discount',id=discount.id)}}">
+              <button class="btn btn-danger rounded-pill px-3" type="submit">Delete</button>
+            </form>
+        </th>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

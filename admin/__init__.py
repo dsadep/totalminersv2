@@ -14,6 +14,7 @@ from admin.routers.settings import settings_router
 from admin.routers.tickets import tickets_router
 from admin.routers.users import users_router
 from admin.routers.worker import workers_router
+from admin.routers.discounts import discounts_router
 from admin.utils import auth_required
 from config import settings
 from logger import config_logger
@@ -31,6 +32,7 @@ app.register_blueprint(settings_router)
 app.register_blueprint(workers_router)
 app.register_blueprint(miners_items_categories_router)
 app.register_blueprint(feedbacks_router)
+app.register_blueprint(discounts_router)
 
 
 @app.get('/')
