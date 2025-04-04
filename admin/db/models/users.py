@@ -43,3 +43,5 @@ class User(Model):
     access_allowed = Column(Boolean, default=True, nullable=True)
     lang = Column(String(length=4), default=UserLangs.RU)
     created = Column(DateTime, default=datetime.datetime.now)
+
+    discounts = relationship("Discount", back_populates="user")
