@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Название</th>
+        <th scope="col">Статус</th>
+        <th scope="col">Действие</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for buy_request in buy_requests %}
+    <tr>
+        <th>{{buy_request.id}}</th>
+        <th>{{buy_request.name}}</th>
+        <th>{{buy_request.state}}</th>
+        <th>
+            <form action="{{url_for('buy_requests_router.buy_request_page', id=buy_request.id)}}">
+                <button class="btn btn-primary rounded-pill px-3" type="submit">Просмотреть</button>
+            </form>
+        </th>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

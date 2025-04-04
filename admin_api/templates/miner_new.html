@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+        .form-column label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-column input {
+            width: 50%;
+            padding: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+    </style>
+    <h1>Создание нового майнера</h1>
+    <form method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="name">Имя</label>
+            <input type="text" class="form-control" id="name" name="name">
+        </div>
+        <div class="form-group">
+            <label for="description">Описание</label>
+            <input type="text" class="form-control" id="description" name="description">
+        </div>
+        <div class="form-group">
+            <label for="description">Описание</label>
+            <select class="form-control" id="category" name="category">
+                {% for category in categories %}
+                    <option value="{{ category.id }}">
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="hash_rate">Хэшрейт (Hash)</label>
+            <input type="text" class="form-control" id="hash_rate" name="hash_rate" value="0">
+        </div>
+        <div class="form-group">
+            <label for="energy_consumption">Энергопотребление (W)</label>
+            <input type="text" class="form-control" id="energy_consumption" name="energy_consumption" value="0">
+        </div>
+        <div class="form-group">
+            <label for="price">Цена (USD)</label>
+            <input type="text" class="form-control" id="price" name="price" value="0">
+        </div>
+        <div class="form-group">
+            <label for="image">Картинка</label>
+            <input type="file" class="form-control" id="image" name="image">
+        </div>
+        <div class="form-group">
+            <label for="income">Доход (USD)</label>
+            <input type="text" class="form-control" id="income" name="income" value="0">
+        </div>
+        <div class="form-group">
+            <label for="hosting">Хостинг (USD)</label>
+            <input type="text" class="form-control" id="hosting" name="hosting value=" 0"">
+        </div>
+        <div class="form-group">
+            <label for="profit">Выгода (USD)</label>
+            <input type="text" class="form-control" id="profit" name="profit" value="0">
+        </div>
+        <div class="row">
+            <div class="form-group col">
+                <label for="discount_count">Количество для скидки</label>
+                <input type="text" class="form-control" id="discount_count" name="discount_count">
+            </div>
+            <div class="form-group col">
+                <label for="discount_value">Процент скидки</label>
+                <input type="text" class="form-control" id="discount_value" name="discount_value">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="is_hidden">Скрыт</label>
+            <input type="checkbox" class="form-check-input" id="is_hidden" name="is_hidden">
+        </div>
+        <div class="form-group">
+            <label for="priority">Приоритет</label>
+            <input type="text" class="form-control" id="priority" name="priority" value="0">
+        </div>
+        <button class="btn btn-primary rounded-pill px-3" type="submit">Создать</button>
+    </form>
+{% endblock %}

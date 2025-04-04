@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Пользователь</th>
+        <th scope="col">Тип платежа</th>
+        <th scope="col">Валюта</th>
+        <th scope="col">Тип оплаты</th>
+        <th scope="col">Состояние</th>
+        <th scope="col">Сумма</th>
+        <th scope="col">Сумма (USD)</th>
+        <th scope="col">Действия</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for billing in billings %}
+    <tr>
+        <th>{{billing.id}}</th>
+        <th><a href="{{url_for('users_router.users_page', id=billing.user.id)}}">{{billing.user.email}}</a></th>
+        <th>{{billing.type}}</th>
+        <th>{{billing.currency}}</th>
+        <th>{{billing.payment_type}}</th>
+        <th>{{billing.state}}</th>
+        <th>{{billing.value}}</th>
+        <th>{{billing.value_usd}}</th>
+        <th>
+            <form action="{{url_for('billings_router.page', id=billing.id)}}">
+                <button class="btn btn-primary rounded-pill px-3" type="submit">Просмотреть</button>
+            </form>
+        </th>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

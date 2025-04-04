@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+        .block {
+            padding: 8px 0;
+        }
+    </style>
+    <div>
+        <div class="block">
+            <h2>Оплата #{{ billing.id }}</h2>
+            <p><b>Тип платежа: </b>{{ billing.type }}</p>
+            <p><b>Валюта: </b>{{ billing.currency }}</p>
+            <p><b>Тип оплаты: </b>{{ billing.payment_type }}</p>
+            <p><b>Состояние: </b>{{ billing.state }}</p>
+            <p><b>Сумма: </b>{{ billing.value }}</p>
+            <p><b>Сумма (USD): </b>{{ billing.value }}$</p>
+            <p><b>Дата создания: </b>{{ billing.created }}</p>
+        </div>
+        <form method="post" action="{{ url_for('billings_router.update_image', id=billing.id) }}"
+              enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="image">Картинка</label>
+                <input type="file" class="form-control" id="image" name="image">
+                <a href="{{ billing.image.url }}">
+                    <img src="{{ billing.image.url }}" height="256" width="256" alt="{{ billing.image.filename }}">
+                </a>
+            </div>
+            <button type="submit">Отправить фото</button>
+        </form>
+        <div class="block">
+            <form method="post" action="{{ url_for('billings_router.update_type', id=billing.id) }}">
+                <h4>Изменение типа платежа:</h4>
+                <button name="btn" type="submit" value="{{ types.buy_request }}"
+                        class="btn {% if billing.type == 'buy_request' %} btn-warning {% else %} btn-success {% endif %} rounded-pill px-3">
+                    Покупка
+                </button>
+                <button name="btn" type="submit" value="{{ types.hosting }}"
+                        class="btn {% if billing.type == 'hosting' %} btn-warning {% else %} btn-success {% endif %} rounded-pill px-3">
+                    Оплата хостинга
+                </button>
+            </form>
+        </div>
+        <div class="block">
+            <form method="post" action="{{ url_for('billings_router.update_state', id=billing.id) }}">
+                <h4>Изменение Состояния:</h4>
+                <button name="btn" type="submit" value="{{ states.invoiced }}"
+                        class="btn {% if billing.state == 'invoiced' %} btn-warning {% else %} btn-success {% endif %} rounded-pill px-3">
+                    Выставлен счет
+                </button>
+                <button name="btn" type="submit" value="{{ states.waiting }}"
+                        class="btn {% if billing.state == 'waiting' %} btn-warning {% else %} btn-success {% endif %} rounded-pill px-3">
+                    В ожидании
+                </button>
+                <button name="btn" type="submit" value="{{ states.confirmation }}"
+                        class="btn {% if billing.state == 'confirmation' %} btn-warning {% else %} btn-success {% endif %} rounded-pill px-3">
+                    На подтверждении
+                </button>
+                <button name="btn" type="submit" value="{{ states.completed }}"
+                        class="btn {% if billing.state == 'completed' %} btn-warning {% else %} btn-success {% endif %} rounded-pill px-3">
+                    Успешно оплачен
+                </button>
+                <button name="btn" type="submit" value="{{ states.canceled }}"
+                        class="btn {% if billing.state == 'canceled' %} btn-warning {% else %} btn-success {% endif %} rounded-pill px-3">
+                    Отменен
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

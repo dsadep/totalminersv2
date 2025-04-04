@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Создание нового майнера</h1>
+    <form method="post">
+        <div class="form-group">
+            <label for="name">Имя</label>
+            <input type="text" class="form-control" id="name" name="name">
+        </div>
+        <div class="form-group">
+            <label for="description">Описание</label>
+            <input type="text" class="form-control" id="description" name="description">
+        </div>
+        <div class="form-group">
+            <label for="is_hidden">Скрыт</label>
+            <input type="checkbox" class="form-check-input" id="is_hidden" name="is_hidden">
+        </div>
+        <div class="form-group">
+            <label for="priority">Приоритет</label>
+            <input type="text" class="form-control" id="priority" name="priority">
+        </div>
+        <button class="btn btn-primary rounded-pill px-3" type="submit">Создать</button>
+    </form>
+{% endblock %}

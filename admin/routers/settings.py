@@ -1,13 +1,14 @@
 from flask import Blueprint, render_template, url_for, redirect, request
 
 from admin.db.database import setting_get, setting_update
-from admin.utils import auth_required
+from admin.utils import auth_required, role_required
 
 settings_router = Blueprint(name='settings_router', import_name='settings_router')
 
 
 @settings_router.get('/settings')
 @auth_required
+@role_required('admin')
 def index():
     data = {
         # Payment
@@ -31,6 +32,7 @@ def index():
 
 @settings_router.post('/settings/update')
 @auth_required
+@role_required('admin')
 def update():
     # Payment
     setting_update(key='payment_bank_card', value=request.form['payment_bank_card'])

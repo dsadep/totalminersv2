@@ -52,6 +52,7 @@ def login_page():
     if check_password_hash(employee.password, password):
         session['logged'] = True
         session['username'] = employee.username
+        session['role'] = employee.role.value
         return redirect(url_for('index'))
     return render_template('login.html')
 

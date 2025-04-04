@@ -20,6 +20,11 @@ def index():
         ],
     )
 
+# @users_router.get('users/get/top20')
+# @auth_required
+# def top20_users():
+#     users_db = basic_get_all_asc(User)
+
 
 @users_router.get('/users/<id>')
 @auth_required
@@ -58,3 +63,4 @@ def users_update(id: int):
     telegram = request.form.get('telegram')
     basic_update(user, firstname=firstname, lastname=lastname, phone=phone, telegram=telegram)
     return redirect(url_for('users_router.users_page', id=id))
+

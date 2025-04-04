@@ -32,6 +32,7 @@ services:
     ports:
       - 5000:5000
     volumes:
+      - ./:/app
       - ./assets:/app/assets
     depends_on:
       - db

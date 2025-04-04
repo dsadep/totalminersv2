@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Воркеры</h1>
+    
+    <!-- Фильтры -->
+    <div class="filters">
+        <a href="{{ url_for('workers_router.index') }}">Все воркеры</a>
+    </div>
+
+    <!-- Общая информация -->
+    <div class="summary">
+        <span>Всего воркеров: {{ total_workers }}</span>
+        <span>Неактивных: {{ faulty_workers_count }}</span>
+        <span>Общий хешрейт: {{ total_hashrate }}</span>
+        <span>Средний хешрейт: {{ average_hashrate }}</span>
+    </div>
+
+    <!-- Таблица воркеров -->
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Тип</th>
+            <th>Режим</th>
+            <th>Хешрейт</th>
+            <th>Товар</th>
+            <th>Статус</th>
+            <th>Действие</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for worker in workers %}
+            <tr>
+                <td>{{ worker.id_str }}</td>
+                <td>{{ worker.name }}</td>
+                <td>{{ worker.behavior }}</td>
+                <td>{{ worker.mode }}</td>
+                <td>{{ worker.hash_rate }}</td>
+                <td>{{ worker.miner_item_name }}</td>
+                <td>
+                    {% if worker.status == 'Online' %}
+                        <span style="color: green;">{{ worker.status }}</span>
+                    {% elif worker.status == 'Offline' %}
+                        <span style="color: red;">{{ worker.status }}</span>
+                    {% else %}
+                        <span style="color: orange;">{{ worker.status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if worker.action %}
+                        <form action="{{ worker.action }}" method="POST">
+                            <input type="submit" class="btn btn-success" value="Восстановить">
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

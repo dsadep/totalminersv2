@@ -1,14 +1,63 @@
+from datetime import datetime
 import logging
+from statistics import mean
 
 from flask import Blueprint, request, render_template, redirect, url_for, flash
 
 from admin.db.database import basic_get, basic_create, basic_update, basic_get_all_asc
 from admin.db.models import User, Worker, MinerItem
 from admin.modules.headframe import headframe_api
-from admin.service import generate_user_dict, generate_miner_worker_dict, generate_miner_item_dict
-from admin.utils import auth_required, HashRateTypes
+from admin.service import generate_extended_worker_dict, generate_user_dict, generate_miner_worker_dict, generate_miner_item_dict
+from admin.utils import auth_required, HashRateTypes, hash_to_str
 
 workers_router = Blueprint('workers_router', 'workers_router')
+
+
+@workers_router.get('/workers')
+@auth_required
+def index():
+    workers_db = basic_get_all_asc(Worker)
+    
+    base_workers_data = [
+        {
+            'hash_rate': worker.miner_item.hash_rate if worker.miner_item is not None else 0
+        }
+        for worker in workers_db
+    ]
+    all_hashrates = [worker['hash_rate'] for worker in base_workers_data if worker['hash_rate'] > 0]
+    average_hashrate = mean(all_hashrates) if all_hashrates else 0
+    workers_data = [
+        generate_extended_worker_dict(worker=worker, average_hashrate=average_hashrate)
+        for worker in workers_db
+    ]
+
+    active_workers = [worker for worker in workers_data if worker['is_active']]
+    faulty_workers = [worker for worker in workers_data if not worker['is_active']]
+
+    return render_template(
+        'workers.html',
+        workers=workers_data,
+        active_workers=active_workers,
+        faulty_workers=faulty_workers,
+        total_workers=len(workers_data),
+        faulty_workers_count=len(faulty_workers),
+        total_hashrate=hash_to_str(sum(all_hashrates)),
+        average_hashrate=hash_to_str(average_hashrate)
+    )
+
+"""Дописать проверку на неактивность"""
+@workers_router.post('/workers/<id>/restore')
+@auth_required
+def restore_worker(id: int):
+    worker = basic_get(Worker, id=id)
+    if not worker:
+        return {'error': f'No worker with id {id}'}
+    if worker.is_active == True:
+        return {'error': 'worker is already active'}
+    
+    basic_update(worker, is_active=True, status_last_updated = datetime.now())
+    return redirect(url_for('workers_router.index'))
+
 
 
 @workers_router.get('/workers/<id>/')

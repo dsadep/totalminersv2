@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import ForeignKey, Column, String, Integer, DateTime, Boolean
+from sqlalchemy import ForeignKey, Column, String, Integer, DateTime, Boolean, func
 from sqlalchemy.orm import relationship
 
 from ..base_model import Model
@@ -24,3 +24,5 @@ class Worker(Model):
     miner_item = relationship('MinerItem', foreign_keys=miner_item_id, uselist=False, lazy='selectin')
     hidden = Column(Boolean, default=False)
     created = Column(DateTime, default=datetime.datetime.now)
+    is_active = Column(Boolean, default=False)
+    status_last_updated = Column(DateTime, default=func.now())

@@ -1,6 +1,6 @@
 from functools import wraps
 
-from flask import session, url_for, redirect
+from flask import session, url_for, redirect, render_template
 
 from config import settings
 
@@ -36,6 +36,17 @@ def auth_required(func):
 
     return wrapper
 
+def role_required(role):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            user_role = session.get('role')   
+            if user_role != role or user_role != 'admin':
+                return render_template('access_forbidden.html')
+            return func(*args, **kwargs)
+        return wrapper  
+    return decorator
+  
 
 def value_to_int(value: [str, float], decimal: int = settings.usd_decimal) -> int:
     if isinstance(value, str):
@@ -49,8 +60,9 @@ def value_to_float(value: [str, int], decimal: int = settings.usd_decimal) -> fl
     return value / 10 ** decimal
 
 
+
 def hash_to_str(value: int) -> str:
-    result = None
+    result = 0
     if value / 10 ** 18 >= 1:
         result = round(value / 10 ** 18, 1)
         result = f'{result} EH/s'
