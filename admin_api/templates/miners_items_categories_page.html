@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+        .form-column label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-column input {
+            width: 50%;
+            padding: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+    </style>
+    <form method="POST" enctype="multipart/form-data">
+        <h1>Майнер #{{ miner_item_category.id }}</h1>
+        <div class="form-group">
+            <label for="name">Имя</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ miner_item_category.name }}">
+        </div>
+        <div class="form-group">
+            <label for="description">Описание</label>
+            <input type="text" class="form-control" id="description" name="description"
+                   value="{{ miner_item_category.description }}">
+        </div>
+        <div class="form-group">
+            <label for="is_hidden">Скрыт</label>
+            <input type="checkbox" class="form-check-input" id="is_hidden" name="is_hidden"
+                    {% if is_hidden %} checked {% endif %}>
+        </div>
+        <div class="form-group">
+            <label for="priority">Приоритет</label>
+            <input type="text" class="form-control" id="priority" name="priority"
+                   value="{{ miner_item_category.priority }}">
+        </div>
+        <button class="btn btn-primary rounded-pill px-3" type="submit">Сохранить</button>
+    </form>
+    <form method="POST" action="{{ url_for('miners_items_categories_router.page_delete', id=miner_item_category.id) }}"
+          enctype="multipart/form-data">
+        <button class="btn btn-danger rounded-pill px-3" type="submit">Удалить</button>
+    </form>
+{% endblock %}

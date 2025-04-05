@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table class="table">
+    <a href="{{url_for('miners_router.new_miner_page')}}" class="btn btn-success rounded-pill px-3">
+        + Добавить
+    </a>
+    <thead>
+    <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Название</th>
+        <th scope="col">Хэшрейт</th>
+        <th scope="col">Цена (USD)</th>
+        <th scope="col">Категория</th>
+        <th scope="col">Состояние</th>
+        <th scope="col">Приоритет</th>
+        <th scope="col">Действие</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for miner_item in miners_items %}
+    <tr>
+        <th>{{miner_item.id}}</th>
+        <th>{{miner_item.name}}</th>
+        <th>{{miner_item.hash_rate_str}}</th>
+        <th>{{miner_item.price}}</th>
+        <th>{{miner_item.category.name}}</th>
+        <th>{% if miner_item.is_hidden %} Скрыто {% else %} Не скрыто {% endif %}</th>
+        <th>{{miner_item.priority}}</th>
+        <th>
+            <form action="{{url_for('miners_router.miner_page',id=miner_item.id)}}">
+                <button class="btn btn-primary rounded-pill px-3" type="submit">Просмотреть</button>
+            </form>
+        </th>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

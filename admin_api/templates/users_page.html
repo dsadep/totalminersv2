@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Пользователь: {{ user.email }}</h1>
+    <form method="POST" action="{{ url_for('users_router.users_update', id=user.id) }}">
+        <ul>
+            <li><b>ID: </b>{{ user.id }}</li>
+            <li><b>Имя: </b><input name="firstname" value="{{ user.firstname }}"></li>
+            <li><b>Фамилия: </b><input name="lastname" value="{{ user.lastname }}"></li>
+            <li><b>Телефон: </b><input name="phone" value="{{ user.phone }}"></li>
+            <li><b>Адрес: </b>{{ user.address }}</li>
+            <li><b>Тип: </b>{{ user.profile_type }}</li>
+            <li><b>ИНН: </b>{{ user.inn }}</li>
+            <li><b>Telegram: </b><input name="telegram" value="{{ user.telegram }}"></li>
+            <li><b>MFA: </b>{% if user.mfa_enabled %}Есть{% else %}Нет{% endif %}</li>
+            <li><b>Имя майнера: </b>{{ user.miner_name }}</li>
+            <li><b>ID майнера: </b>{{ user.miner_id }}</li>
+            <li><b>Кошелек: </b>{{ user.wallet }}</li>
+            <li><b>Язык: </b>{{ user.lang }}</li>
+            <li><b>Доступ: </b>{% if user.access_allowed %}Есть{% else %}Нет{% endif %}</li>
+        </ul>
+        <div class="my-2">
+            <a class="btn btn-primary" href="https://pool.headframe.io/customers/{{ user.miner_id }}" target="_blank">
+                Открыть аккаунт
+            </a>
+        </div>
+        <div class="my-2">
+            <a href="{{ url_for('users_router.users_block', id=user.id) }}" class="btn btn-danger rounded-pill">
+                Заблокировать
+            </a>
+            <a href="{{ url_for('users_router.users_unblock', id=user.id) }}" class="btn btn-success rounded-pill">
+                Разблокировать
+            </a>
+        </div>
+        <div class="my-2">
+            <input type="submit" class="btn btn-success rounded-pill" value="Сохранить">
+        </div>
+    </form>
+{% endblock %}

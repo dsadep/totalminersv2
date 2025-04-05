@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">ФИО</th>
+            <th scope="col">E-Mail</th>
+            <th scope="col">Telegram</th>
+            <th scope="col">Действие</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            <tr>
+                <th>{{ user.id }}</th>
+                <th>{{ user.firstname }} {{ user.lastname }}</th>
+                <th>{{ user.email }}</th>
+                <th>{{ user.telegram }}</th>
+                <th>
+                    <a class="btn btn-primary" href="{{ url_for('users_router.users_page', id=user.id) }}">
+                        Просмотреть
+                    </a>
+                    <a class="btn btn-primary" href="{{ url_for('workers_router.users_workers_page', id=user.id) }}">
+                        Воркеры
+                    </a>
+                </th>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

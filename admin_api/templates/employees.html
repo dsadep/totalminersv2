@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<table class="table">
+    <a href="{{url_for('employees_router.create_new_employee')}}" class="btn btn-success rounded-pill px-3">
+        + Добавить
+    </a>
+    <thead>
+    <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Имя пользователя</th>
+        <th scope="col">E-Mail</th>
+        <th scope="col">Действие</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for employee in employees %}
+    <tr>
+        <th>{{employee.id}}</th>
+        <th>{{employee.username}}</th>
+        <th>{{employee.email}}</th>
+        <th>
+            <form method="post" action="{{url_for('employees_router.delete_employee',id=employee.id)}}">
+                <button class="btn btn-danger rounded-pill px-3" type="submit">Удалить</button>
+            </form>
+        </th>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

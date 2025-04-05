@@ -73,3 +73,21 @@ class TicketService:
             'time': ticket.created_at.strftime('%H:%M'),
             'created': ticket.created_at.strftime(format=settings.date_time_format),
         }
+
+    # async def sort_by_status(self, user: User, status: bool):
+    #     return {
+    #         'status': 'ok',
+    #         'ticket': [
+    #             await self.generate_ticket_dict(ticket=ticket)
+    #             for ticket in await BaseService().get_all(self.model, user_id=user.id, is_open=status)
+    #         ]
+    #     }
+    
+    # async def sort_by_date(self, user: User, created_at: datetime):
+    #     return {
+    #         'status': 'ok',
+    #         'ticket': [
+    #             await self.generate_ticket_dict(ticket=ticket)
+    #             for ticket in await BaseService().get_all(self.model, user_id=user.id, created_at=created_at)
+    #         ]
+    #     }

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <table class="table">
+        <a href="{{ url_for('miners_items_categories_router.create') }}" class="btn btn-success rounded-pill px-3">
+            + Добавить
+        </a>
+        <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Название</th>
+            <th scope="col">Состояние</th>
+            <th scope="col">Приоритет</th>
+            <th scope="col">Действие</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for miner_item_category in miners_items_categories %}
+            <tr>
+                <th>{{ miner_item_category.id }}</th>
+                <th>{{ miner_item_category.name }}</th>
+                <th>{% if miner_item_category.is_hidden %} Скрыто {% else %} Не скрыто {% endif %}</th>
+                <th>{{ miner_item_category.priority }}</th>
+                <th>
+                    <form action="{{ url_for('miners_items_categories_router.page', id=miner_item_category.id) }}">
+                        <button class="btn btn-primary rounded-pill px-3" type="submit">Просмотреть</button>
+                    </form>
+                </th>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

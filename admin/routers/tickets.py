@@ -61,3 +61,4 @@ def ticket_page_post(id: int):
     else:
         basic_create(Message, ticket_id=ticket.id, sender=MessageSender.ADMIN, content=request.form.get('msg'))
     return redirect(url_for('tickets_router.ticket_page', id=ticket.id))
+

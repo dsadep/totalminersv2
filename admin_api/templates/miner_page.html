@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <form method="POST" enctype="multipart/form-data">
+        <h1>Майнер #{{ miner_item.id }}</h1>
+        <div class="form-group">
+            <label for="name">Имя</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ miner_item.name }}">
+        </div>
+        <div class="form-group">
+            <label for="description">Описание</label>
+            <input type="text" class="form-control" id="description" name="description"
+                   value="{{ miner_item.description }}">
+        </div>
+        <div class="form-group">
+            <label for="category">Описание</label>
+            <select class="form-control" id="category" name="category">
+                {% for category in categories %}
+                    <option value="{{ category.id }}"
+                            {% if miner_item.category.id == category.id %} selected {% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="hash_rate">Хэшрейт (Hash)</label>
+            <input type="text" class="form-control" id="hash_rate" name="hash_rate"
+                   value="{{ miner_item.hash_rate }}">
+        </div>
+        <div class="form-group">
+            <label for="energy_consumption">Энергопотребление (W)</label>
+            <input type="text" class="form-control"
+                   id="energy_consumption" name="energy_consumption" value="{{ miner_item.energy_consumption }}">
+        </div>
+        <div class="form-group">
+            <label for="price">Цена (USD)</label>
+            <input type="text" class="form-control" id="price" name="price" value="{{ miner_item.price }}">
+        </div>
+        <div class="form-group">
+            <label for="image">Картинка</label>
+            <input type="file" class="form-control" id="image" name="image">
+            <img src="{{ miner_item.image.url }}" height="128" width="128">
+        </div>
+        <div class="form-group">
+            <label for="income">Доход (USD)</label>
+            <input type="text" class="form-control" id="income" name="income" value="{{ miner_item.income }}">
+        </div>
+        <div class="form-group">
+            <label for="hosting">Хостинг (USD)</label>
+            <input type="text" class="form-control" id="hosting" name="hosting" value="{{ miner_item.hosting }}">
+        </div>
+        <div class="form-group">
+            <label for="profit">Выгода (USD)</label>
+            <input type="text" class="form-control" id="profit" name="profit" value="{{ miner_item.profit }}">
+        </div>
+        <div class="row">
+            <div class="form-group col">
+                <label for="discount_count">Количество для скидки</label>
+                <input type="text" class="form-control" id="discount_count" name="discount_count"
+                       value="{{ miner_item.discount_count }}">
+            </div>
+            <div class="form-group col">
+                <label for="discount_value">Процент скидки</label>
+                <input type="text" class="form-control" id="discount_value" name="discount_value"
+                       value="{{ miner_item.discount_value }}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="is_hidden">Скрыт</label>
+            <input type="checkbox" class="form-check-input"
+                   id="is_hidden" name="is_hidden" {% if is_hidden %} checked {% endif %}>
+        </div>
+        <div class="form-group">
+            <label for="priority">Приоритет</label>
+            <input type="text" class="form-control" id="priority" name="priority" value="{{ miner_item.priority }}">
+        </div>
+        <button class="btn btn-primary rounded-pill px-3" type="submit">Сохранить</button>
+    </form>
+    <form method="POST" action="{{ url_for('miners_router.miner_page_delete', id=miner_item.id) }}"
+          enctype="multipart/form-data">
+        <button class="btn btn-danger rounded-pill px-3" type="submit">Удалить</button>
+    </form>
+{% endblock %}

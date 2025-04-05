@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div>
+        <form action="{{ url_for('settings_router.update') }}" method="post">
+            <h2>Оплата</h2>
+            <div class="form-group">
+                <label for="payment_bank_card">Данные оплаты (Банковская карта)</label>
+                <input type="text" class="form-control" id="payment_bank_card" name="payment_bank_card"
+                       placeholder="Введите значение" value="{{ payment_bank_card }}">
+            </div>
+            <div class="form-group">
+                <label for="payment_btc">Данные оплаты (BTC)</label>
+                <input type="text" class="form-control" id="payment_btc" name="payment_btc"
+                       placeholder="Введите значение" value="{{ payment_btc }}">
+            </div>
+            <div class="form-group">
+                <label for="payment_usdt">Данные оплаты (USDT)</label>
+                <input type="text" class="form-control" id="payment_usdt" name="payment_usdt"
+                       placeholder="Введите значение" value="{{ payment_usdt }}">
+            </div>
+
+            <h2>Калькулятор</h2>
+            <div class="row">
+                <div class="form-group col">
+                    <label for="invest_min">Минимальное значение интервала калькулятора</label>
+                    <input type="text" class="form-control" id="invest_min" name="invest_min"
+                           placeholder="Введите значение" value="{{ invest_min }}">
+                </div>
+                <div class="form-group col">
+                    <label for="invest_max">Максимальное значение интервала калькулятора</label>
+                    <input type="text" class="form-control" id="invest_max" name="invest_max"
+                           placeholder="Введите значение" value="{{ invest_max }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="electricity_cost">Цена электричества</label>
+                <input type="text" class="form-control" id="electricity_cost" name="electricity_cost"
+                       placeholder="Введите значение" value="{{ electricity_cost }}">
+            </div>
+            <div class="form-group">
+                <label for="hash_rate_electricity_consumption">Потребление 1TH</label>
+                <input type="text" class="form-control" id="hash_rate_electricity_consumption"
+                       name="hash_rate_electricity_consumption" placeholder="Введите значение"
+                       value="{{ hash_rate_electricity_consumption }}">
+            </div>
+            <div class="form-group">
+                <label for="hash_rate_cost">Стоимость 1TH</label>
+                <input type="text" class="form-control" id="hash_rate_cost" name="hash_rate_cost"
+                       placeholder="Введите значение" value="{{ hash_rate_cost }}">
+            </div>
+
+            <h2>Остальные</h2>
+            <div class="form-group">
+                <label for="miner_banner">Майнер для баннера (ID)</label>
+                <input type="text" class="form-control" id="miner_banner" name="miner_banner"
+                       placeholder="Введите ссылку" value="{{ miner_banner }}">
+            </div>
+            <div class="form-group">
+                <label for="home_page_youtube_link">Ссылка на ютуб (Главная страница)</label>
+                <input type="text" class="form-control" id="home_page_youtube_link" name="home_page_youtube_link"
+                       placeholder="Введите ссылку" value="{{ home_page_youtube_link }}">
+            </div>
+            <div class="row">
+                <div class="form-group col">
+                    <label for="payback_min">Плохая окупаемость (мес)</label>
+                    <input type="text" class="form-control" id="payback_min" name="payback_min"
+                           placeholder="Введите ссылку" value="{{ payback_min }}">
+                </div>
+                <div class="form-group col">
+                    <label for="payback_max">Хорошая окупаемость (мес)</label>
+                    <input type="text" class="form-control" id="payback_max" name="payback_max"
+                           placeholder="Введите ссылку" value="{{ payback_max }}">
+                </div>
+            </div>
+            <button class="btn btn-primary rounded-pill px-3" type="submit">Сохранить</button>
+        </form>
+    </div>
+{% endblock %}

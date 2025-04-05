@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block content %}
+    <style>
+        table, th, td {
+            border: 1px solid;
+        }
+
+        #block_container {
+            border: 1px solid black;
+            margin: 1rem;
+            padding: 2rem 2rem;
+        }
+
+        .block {
+            padding: 8px 0;
+        }
+    </style>
+    <div>
+        <div id="block_container">
+            <h1>Заявка #{{ buy_request.id }}</h1>
+            <h2>Статус: {{ buy_request.state }}</h2>
+            <div class="block">
+                <h3>Информация о клиенте:</h3>
+                <p>Имя: <b>{{ buy_request.user.firstname }}</b></p>
+                <p>Фамилия: <b>{{ buy_request.user.lastname }}</b></p>
+                <p>E-Mail: <b>{{ buy_request.user.email }}</b></p>
+                <p>Телефон: <b>{{ buy_request.user.phone }}</b></p>
+                <p>Телеграм: <b>{{ buy_request.user.telegram }}</b></p>
+                <p>Headframe-аккаунт: <b>{{ buy_request.user.miner_name }}</b></p>
+                <form action="{{ url_for('billings_router.page', id=billing.id) }}">
+                    <button class="btn btn-primary rounded-pill px-3" type="submit">Просмотреть счёт</button>
+                </form>
+            </div>
+            <div class="block">
+                <h3>Заказ:</h3>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">ID майнера</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Количество</th>
+                        <th scope="col">Хэшрейт (шт)</th>
+                        <th scope="col">Потребление в W (шт)</th>
+                        <th scope="col">Цена в USD (шт)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for buy_request_miner_item in buy_requests_miners_items %}
+                        <tr>
+                            <th>{{ buy_request_miner_item.miner_item.id }}</th>
+                            <th>{{ buy_request_miner_item.miner_item.name }}</th>
+                            <th>{{ buy_request_miner_item.count }}</th>
+                            <th>{{ buy_request_miner_item.miner_item.hash_rate_str }}</th>
+                            <th>{{ buy_request_miner_item.miner_item.energy_consumption }}</th>
+                            <th>{{ buy_request_miner_item.miner_item.price }}</th>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="block">
+                <h3>Подключить воркеры:</h3>
+                <a href="{{ url_for('workers_router.create_boundary', id=buy_request.user.id) }}"
+                   class="btn btn-success rounded-pill">
+                    Добавить Boundary
+                </a>
+            </div>
+            <div class="block">
+                <form method="post">
+                    <h4>Действия (отметить новый статус):</h4>
+                    <button name="btn" class="btn btn-warning rounded-pill px-3" type="submit"
+                            value="{{ states.wait }}">
+                        В ожидании
+                    </button>
+                    <button name="btn" class="btn btn-info rounded-pill px-3" type="submit"
+                            value="{{ states.in_work }}">
+                        В работе
+                    </button>
+                    <button name="btn" class="btn btn-success rounded-pill px-3" type="submit"
+                            value="{{ states.completed }}">
+                        Выполнено
+                    </button>
+                    <button name="btn" class="btn btn-danger rounded-pill px-3" type="submit"
+                            value="{{ states.cancelled }}">
+                        Отменено
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

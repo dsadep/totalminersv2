@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div style="color:red;">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <h1>Воркер #{{ worker.id }}</h1>
+    <form method="POST" action="{{ url_for('workers_router.update', worker_id=worker.id) }}">
+        <div class="form-group">
+            <label><b>ID:</b> {{ worker.id }}</label>
+        </div>
+        <div class="form-group">
+            <label for="id_str"><b>Worker ID</b></label>
+            <input type="text" class="form-control" id="id_str" name="id_str" value="{{ worker.id_str }}">
+        </div>
+        <div class="form-group">
+            <label for="name"><b>Название</b></label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ worker.name }}">
+        </div>
+        <div class="form-group">
+            <label for="behavior"><b>Тип</b></label>
+            <select id="behavior" name="behavior" class="form-control">
+                <option value="">Выберите значение</option>
+                <option value="hardware" {% if worker.behavior == 'hardware' %}selected{% endif %}>hardware</option>
+                <option value="boundary" {% if worker.behavior == 'boundary' %}selected{% endif %}>boundary</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>
+                <b>Пользователь:</b>
+                <a href="{{ url_for('users_router.users_page', id=worker.user.id) }}">{{ worker.user.email }}</a>
+            </label>
+        </div>
+        <div class="form-group">
+            <label for="miner_item_id"><b>Товар</b></label>
+            <select id="miner_item_id" name="miner_item_id" class="form-control">
+                <option value="">Выберите значение</option>
+                {% for miner_item in miners_items %}
+                    <option value="{{ miner_item.id }}"
+                            {% if worker.miner_item.id == miner_item.id %}selected{% endif %}>
+                        {{ miner_item.id }} - {{ miner_item.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="hidden">Скрыт</label>
+            <input type="checkbox" class="form-check-input" id="hidden" name="hidden"
+                   {% if worker.hidden %}checked{% endif %}>
+        </div>
+        <div class="my-2">
+            <input type="submit" class="btn btn-success rounded-pill" value="Сохранить">
+        </div>
+    </form>
+{% endblock %}
