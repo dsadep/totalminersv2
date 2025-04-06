@@ -1,7 +1,6 @@
-from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import and_, asc, desc, create_engine, Select, delete
+from sqlalchemy import create_engine, Select, delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker, joinedload
 from werkzeug.security import generate_password_hash
@@ -129,18 +128,28 @@ def add_message_to_ticket(id: int, msg: str, sender: str):
         session.rollback()
 
 
-def get_tickets_sorted_by_date(date: datetime, date_end: datetime):
-    query = Select(Ticket).where(
-        and_(
-            Ticket.created_at >= date,
-            Ticket.created_at < date_end
-        )
-    )
-    result = session.execute(query)
-    return result.scalars().all()
-
-
-
+#
+#
+# def create_worker(
+#         item_name,
+#         worker_id,
+#         worker_name,
+#         hashrate,
+#         item_id,
+#         user_id,
+# ) -> Worker:
+#     worker = Worker()
+#     worker.item_name = item_name
+#     worker.worker_id = worker_id
+#     worker.worker_name = worker_name
+#     worker.user_id = user_id
+#     worker.hashrate = hashrate
+#     worker.item_id = item_id
+#     session.add(worker)
+#     session.commit()
+#     session.refresh(worker)
+#     return worker
+#
 
 def create_db():
     Model.metadata.create_all(bind=engine)
@@ -191,15 +200,6 @@ def basic_update(db_obj: Model, **obj_in_data):
 def basic_delete(db_model, id_: int):
     session.execute(delete(db_model).where(db_model.id == id_))
     session.commit()
-
-
-def basic_get_sorted_asc(db_model, order_by_column, **filters):
-    result = session.execute(Select(db_model).filter_by(**filters).order_by(asc(order_by_column)))
-    return result.scalars().all()
-
-def basic_get_sorted_desc(db_model, order_by_column, **filters):
-    result = session.execute(Select(db_model).filter_by(**filters).order_by(desc(order_by_column)))
-    return result.scalars().all()
 
 
 """    

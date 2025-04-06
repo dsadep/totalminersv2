@@ -1,9 +1,10 @@
-from flask import Flask, session, render_template, request, redirect, url_for
+from flask import Flask, request, jsonify
 from werkzeug.security import check_password_hash
+import datetime
 
 from admin.db import database
-from admin.db.database import basic_get
-from admin.db.models import Employee
+from admin.db.database import basic_get, basic_create
+from admin.db.models import Employee, User
 from admin.routers.billings import billings_router
 from admin.routers.buy_requests import buy_requests_router
 from admin.routers.employees import employees_router
@@ -15,7 +16,7 @@ from admin.routers.tickets import tickets_router
 from admin.routers.users import users_router
 from admin.routers.worker import workers_router
 from admin.routers.discounts import discounts_router
-from admin.utils import auth_required
+from admin.utils import auth_required, generate_token
 from config import settings
 from logger import config_logger
 
@@ -37,33 +38,44 @@ app.register_blueprint(discounts_router)
 
 @app.get('/')
 @app.get('/index')
-@auth_required
 def index():
-    return redirect(url_for('users_router.index'))
+    return jsonify({"message": "OK!"})
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login_page():
-    if request.method == 'GET':
-        return render_template('login.html')
-    email = request.form.get('email')
-    password = request.form.get('password')
+@app.route('/login', methods=['POST'])
+def api_login():
+    data = request.get_json()
+    print('Полученные данные', data)
+    if not data:
+        return jsonify({"error": "Invalid input"}), 400
+
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({"error": "Email and password required"}), 400
+
     employee = basic_get(Employee, email=email)
+    
     if employee is None:
-        return render_template('login.html')
-    if check_password_hash(employee.password, password):
-        session['logged'] = True
-        session['username'] = employee.username
-        session['role'] = employee.role.value
-        return redirect(url_for('index'))
-    return render_template('login.html')
+        print("User not found")
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    password = password.strip("'\"")
+
+    if not check_password_hash(employee.password, password):
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    token = generate_token(employee.email)
+    return jsonify({"token": token})
 
 
-@app.route('/logout')
+
+
+@app.route('/logout', methods=['POST'])
 @auth_required
-def logout():
-    session.clear()
-    return redirect(url_for('login_page'))
+def api_logout():
+    return jsonify({"message": "Logged out successfully"})
 
 
 @app.get('/test')
@@ -73,14 +85,74 @@ def create_test_admin():
         'example@example.com',
         'qwerty21'
     )
-    return 'ok'
+    return jsonify({"message": "Test admin created"})
 
 
 @app.get('/initdb')
 def initdb():
     database.create_db()
-    return 'ok'
+    return jsonify({"message": "Database initialized"})
 
+@app.post('/create_test_user')
+@auth_required
+def create_test_user():
+    """Создание тестового пользователя"""
+    
+    # Получение данных из запроса
+    data = request.get_json()
+    
+    # Проверка, что все обязательные поля есть в запросе
+    required_fields = [
+        'firstname', 'lastname', 'phone', 'email', 'password',
+        'telegram', 'country', 'address', 'inn', 'profile_type',
+        'wallet', 'miner_name', 'miner_id', 'wallet_id', 'lang'
+    ]
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Отсутствует обязательное поле: {field}"}), 400
+    
+    user = basic_create(
+        User,
+        firstname=data['firstname'],
+        lastname=data['lastname'],
+        phone=data['phone'],
+        email=data['email'],
+        password=data['password'],
+        telegram=data['telegram'],
+        country=data['country'],
+        address=data['address'],
+        inn=data['inn'],
+        profile_type=data['profile_type'],
+        wallet=data['wallet'],
+        miner_name=data['miner_name'],
+        miner_id=data['miner_id'],
+        wallet_id=data['wallet_id'],
+        lang=data['lang'],
+        created=datetime.datetime.now()
+    )
+    
+    return jsonify({
+        "message": "Тестовый пользователь создан",
+        "user": {
+            "id": user.id,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "phone": user.phone,
+            "email": user.email,
+            "telegram": user.telegram,
+            "country": user.country,
+            "address": user.address,
+            "inn": user.inn,
+            "profile_type": user.profile_type,
+            "wallet": user.wallet,
+            "miner_name": user.miner_name,
+            "miner_id": user.miner_id,
+            "wallet_id": user.wallet_id,
+            "lang": user.lang,
+            "created": user.created.strftime('%Y-%m-%d %H:%M:%S')
+        }
+    }), 201
 
 def create_app():
     config_logger()

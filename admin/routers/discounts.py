@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, request, url_for, redirect
+from flask import Blueprint, request, jsonify
 from datetime import datetime
 
 from admin import basic_get
@@ -12,40 +12,38 @@ discounts_router = Blueprint(name='discounts_router', import_name='discounts_rou
 
 @discounts_router.get('/discounts')
 @auth_required
-def index():
-    return render_template(
-        'discounts.html',
-        discounts=[
-            discount
-            for discount in basic_get_all_asc(Discount)
-        ],
-    )
+def get_all_discounts():
+    """Получение всех скидок."""
+    discounts = [discount for discount in basic_get_all_asc(Discount)]
+    return jsonify({"discounts": discounts})
 
 @discounts_router.post('/discounts/<id>/delete')
 @auth_required
 def delete_discount(id: int):
+    """Удаление скидки по ID."""
+    discount = basic_get(Discount, id=id)
+    if not discount:
+        return jsonify({"error": "Скидка не найдена"}), 404
+
     basic_delete(Discount, id_=id)
-    return redirect(url_for('discounts_router.index'))
+    return jsonify({"message": "Скидка удалена"}), 200
 
-@discounts_router.get('/discounts/new')
 @auth_required
-def new_discount_form():
-    return render_template('discounts_new.html')
-
-@discounts_router.post('/discounts/new')
-@auth_required
-def new_discount():
+def create_new_discount():
+    """Создание новой скидки."""
     date_format = "%Y-%m-%dT%H:%M"
 
-    # TODO!: add checking ids in db 
-    user_id = request.form['user_id']
-    miner_id = request.form['miner_id']
+    # Получение данных из формы
+    user_id = request.form.get('user_id')
+    miner_id = request.form.get('miner_id')
     applies_to_electricity = 'applies_to_electricity' in request.form
-    discount_percentage = float(request.form['discount_percentage'])/100
+    discount_percentage = float(request.form.get('discount_percentage', 0)) / 100
     is_active = 'is_active' in request.form
-    expiration_date = datetime.strptime(request.form['expiration_date'], date_format) or datetime.now() 
+    expiration_date = request.form.get('expiration_date')
+    expiration_date = datetime.strptime(expiration_date, date_format) if expiration_date else datetime.now()
 
-    basic_create(
+    # Создание скидки
+    discount = basic_create(
         Discount,
         user_id=user_id,
         miner_id=miner_id,
@@ -54,4 +52,5 @@ def new_discount():
         is_active=is_active,
         expiration_date=expiration_date
     )
-    return redirect(url_for('discounts_router.index'))
+
+    return jsonify({"message": "Скидка успешно создана", "discount_id": discount.id}), 201

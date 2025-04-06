@@ -1,9 +1,10 @@
+import jwt
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 
-from flask import session, url_for, redirect, render_template
+from flask import session, request, jsonify
 
 from config import settings
-
 
 class HashRateTypes:
     HASH = 'Hash/s'
@@ -26,27 +27,46 @@ class HashRateTypes:
             self.PH: 10 ** 15,
         }.get(hash_type, 1)
 
+def generate_token(login: str) -> str:
+    token = jwt.encode(
+        {
+            "login": login,
+            "exp": datetime.now(tz=timezone.utc) + timedelta(days=7)
+        },
+        settings.jwt_secret,
+        algorithm="HS256",
+    )
+
+    return token
+
+def check_token(token: str) -> bool:
+    try:
+        jwt.decode(token, settings.jwt_secret, algorithms='HS256')
+        return True
+    except jwt.ExpiredSignatureError:
+        return False
+    except jwt.InvalidSignatureError:
+        return False
+    except Exception:
+        return False
 
 def auth_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if 'logged' in session:
+        token = request.headers.get('Authorization')
+        if token and token.startswith("Bearer "):
+            token = token.split("Bearer ")[1]
+        elif 'token' in session:
+            token = session.get('token')
+        else:
+            return jsonify({"error": "Unauthorized"}), 401
+
+        if  check_token(token):
             return func(*args, **kwargs)
-        return redirect(url_for('login_page'))
+        return jsonify({"error": "Unauthorized"}), 401
 
     return wrapper
 
-def role_required(role):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            user_role = session.get('role')   
-            if user_role != role or user_role != 'admin':
-                return render_template('access_forbidden.html')
-            return func(*args, **kwargs)
-        return wrapper  
-    return decorator
-  
 
 def value_to_int(value: [str, float], decimal: int = settings.usd_decimal) -> int:
     if isinstance(value, str):
@@ -60,9 +80,8 @@ def value_to_float(value: [str, int], decimal: int = settings.usd_decimal) -> fl
     return value / 10 ** decimal
 
 
-
 def hash_to_str(value: int) -> str:
-    result = 0
+    result = None
     if value / 10 ** 18 >= 1:
         result = round(value / 10 ** 18, 1)
         result = f'{result} EH/s'

@@ -1,8 +1,5 @@
-from datetime import datetime, timedelta
-from statistics import mean
 from typing import Optional
 
-from admin.db.database import basic_update
 from admin.db.models import User, Billing, BuyRequest, MinerItem, Image, Ticket, Message, MinerItemCategory, Feedback, \
     BuyRequestMinerItem, Worker
 from admin.utils import hash_to_str, value_to_float
@@ -187,40 +184,4 @@ def generate_miner_worker_dict(worker: Worker, workers_statuses: dict) -> dict:
         'status': workers_statuses.get(worker.id_str, 'unavailable'),
         'hidden': worker.hidden,
         'created': worker.created.strftime(format=settings.date_time_format),
-    }
-
-
-
-def generate_extended_worker_dict(worker: Worker, average_hashrate: float) -> dict:
-    if not worker:
-        return {}
-    hash_rate = 0
-    if worker.miner_item is not None:
-        hash_rate = worker.miner_item.hash_rate 
-    else:
-        hash_rate = 0
-    hash_rate_str = hash_to_str(hash_rate)
-    status = 'Unknown'
-    if (datetime.now() - worker.status_last_updated) > timedelta(hours=24): 
-        if hash_rate > 0:
-            status = 'Online'
-        else:
-            status = 'Offline'
-            basic_update(worker, is_active=False)
-    else:
-        status = 'Online' if worker.is_active else 'Offline'
-    
-    return {
-        'id_str': worker.id_str,
-        'name': worker.name,
-        'behavior': worker.behavior,
-        'hash_rate': hash_rate_str,  
-        'miner_item_name': worker.miner_item.name if worker.miner_item else 'Unknown',
-        'user': {
-            'id': worker.user.id,
-            'email': worker.user.email
-        } if worker.user else {'id': None, 'email': 'Unknown'},
-        'status': status,
-        'action': f"/workers/{worker.id}/restore" if not worker.is_active else None,
-        'is_active': worker.is_active 
     }

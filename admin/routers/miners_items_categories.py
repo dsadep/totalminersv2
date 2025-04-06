@@ -1,4 +1,4 @@
-from flask import session, render_template, request, redirect, url_for, Blueprint
+from flask import jsonify, request, Blueprint
 
 from admin.db.database import basic_update, basic_create, basic_get_all_asc, basic_get, basic_delete
 from admin.db.models import MinerItemCategory
@@ -14,65 +14,69 @@ miners_items_categories_router = Blueprint(
 @miners_items_categories_router.get('/miners_items_categories')
 @auth_required
 def index():
-    return render_template(
-        'miners_items_categories.html',
-        username=session['username'],
-        miners_items_categories=[
-            generate_miner_item_category_dict(miner_item_category=miner_item_category)
-            for miner_item_category in basic_get_all_asc(MinerItemCategory)
-        ],
-    )
+    """Получение категории товара майнинга по id."""
+    miner_item_category = basic_get(MinerItemCategory, id=id)
+    if not miner_item_category:
+        return jsonify({"error": "Miner Item Category not found"}), 404
+    return jsonify(generate_miner_item_category_dict(miner_item_category=miner_item_category)), 200
+
+
 
 
 @miners_items_categories_router.get('/miners_items_categories/<id>')
 @auth_required
 def page(id: int):
+    """Получение категории товара майнинга по id."""
     miner_item_category = basic_get(MinerItemCategory, id=id)
-    return render_template(
-        'miners_items_categories_page.html',
-        username=session['username'],
-        miner_item_category=generate_miner_item_category_dict(miner_item_category=miner_item_category),
-    )
+    if not miner_item_category:
+        return jsonify({"error": "Miner Item Category not found"}), 404
+    return jsonify(generate_miner_item_category_dict(miner_item_category=miner_item_category)), 200
+
 
 
 @miners_items_categories_router.post('/miners_items_categories/<id>')
 @auth_required
 def page_post(id: int):
+    """Обновление категории товара майнинга."""
     miner_item_category = basic_get(MinerItemCategory, id=id)
+    if not miner_item_category:
+        return jsonify({"error": "Miner Item Category not found"}), 404
+
+    data = request.get_json()
     basic_update(
         miner_item_category,
-        name=request.form.get('name'),
-        description=request.form.get('description'),
-        priority=int(request.form.get('priority')),
-        is_hidden=request.form.get('ishidden') == 'on',
+        name=data.get('name'),
+        description=data.get('description'),
+        priority=int(data.get('priority')),
+        is_hidden=data.get('is_hidden') == 'on',
     )
-    return redirect(url_for('miners_items_categories_router.page', id=id))
+    return jsonify({"message": "Miner Item Category updated successfully"}), 200
 
 
 @miners_items_categories_router.post('/miners_items_categories/<id>/delete')
 @auth_required
 def page_delete(id: int):
+    """Удаление категории товара майнинга."""
+    miner_item_category = basic_get(MinerItemCategory, id=id)
+    if not miner_item_category:
+        return jsonify({"error": "Miner Item Category not found"}), 404
+
     basic_delete(MinerItemCategory, id_=id)
-    return redirect(url_for('miners_items_categories_router.index'))
-
-
-@miners_items_categories_router.get('/miners_items_categories/create')
-@auth_required
-def create():
-    return render_template(
-        'miners_items_categories_create.html',
-        username=session['username'],
-    )
+    return jsonify({"message": "Miner Item Category deleted successfully"}), 200
 
 
 @miners_items_categories_router.post('/miners_items_categories/create')
 @auth_required
 def create_post():
+    """Создание новой категории товара майнинга."""
+    data = request.get_json()
+    
     miner_item_category = basic_create(
         MinerItemCategory,
-        name=request.form.get('name'),
-        description=request.form.get('description'),
-        priority=int(request.form.get('priority')),
-        is_hidden=request.form.get('ishidden') == 'on',
+        name=data.get('name'),
+        description=data.get('description'),
+        priority=int(data.get('priority')),
+        is_hidden=data.get('is_hidden') == 'on',
     )
-    return redirect(url_for('miners_items_categories_router.page', id=miner_item_category.id))
+    
+    return jsonify({"message": "Miner Item Category created successfully", "id": miner_item_category.id}), 201
