@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from datetime import datetime
+from datetime import datetime, timedelta
 from admin import basic_get
-from admin.db.database import basic_get_all_asc, basic_create
+from admin.db.database import basic_get_all_asc, basic_create, get_tickets_sorted_by_date
 from admin.db.models import Ticket, Message, Image
 from admin.db.models.messages import MessageSender
 from admin.service import generate_ticket_dict, generate_message_dict
@@ -17,9 +17,12 @@ tickets_router = Blueprint(name='tickets_router', import_name='tickets_router')
 @tickets_router.get('/tickets')
 @auth_required
 def index():
-    """Получение всех тикетов"""
-    tickets = [generate_ticket_dict(ticket=ticket) for ticket in basic_get_all_asc(Ticket)]
-    return jsonify(tickets)
+    tickets = basic_get_all_asc(Ticket)
+    open_tickets = [generate_ticket_dict(ticket) for ticket in tickets if ticket.is_open]
+    closed_tickets = [generate_ticket_dict(ticket) for ticket in tickets if not ticket.is_open]
+
+    sorted_tickets = open_tickets + closed_tickets
+    return jsonify(sorted_tickets)
 
 @tickets_router.get('/tickets/<id>')
 @auth_required
@@ -74,20 +77,30 @@ def post_ticket_message(id):
         )
     return jsonify({"message": "Сообщение добавлено", "ticket_id": ticket.id})
 
-@tickets_router.get('/tickets/status')
+@tickets_router.get('/tickets/status/<status>')
 @auth_required
-def status_sorted_tickets(status: bool):
-    """��������� ���� ������� � ������������ ��������"""
-    tickets = [generate_ticket_dict(ticket=ticket) for ticket in basic_get_all_asc(Ticket, is_open=status)]
-    return jsonify(tickets)
+def get_tickets_by_status(status: bool):
+    tickets = basic_get_all_asc(Ticket, is_open=status)
+    return jsonify([generate_ticket_dict(ticket=ticket) for ticket in tickets])
 
-@tickets_router.get('/tickets/date')
+
+@tickets_router.get('/tickets/sort/<date>')
 @auth_required
-def date_sorted_tickets(date: datetime):
-    """��������� ���� ������� �� ������������ ����"""
-    tickets = [generate_ticket_dict(ticket=ticket) for ticket in basic_get_all_asc(Ticket, created_at=date)]
-    return jsonify(tickets)
+def get_tickets_by_date(date):
+    try:
+        date_obj = datetime.strptime(date, '%Y-%m-%d')
+    except ValueError:
+        return jsonify({"error": "Invalid date format, use YYYY-MM-DD"}), 400
 
-@tickets_router.get('/chabanm')
-def test_admin():
-    return jsonify({'message': 'hi'})
+    start_of_day = date_obj
+    end_of_day = date_obj + timedelta(days=1)
+
+    tickets = get_tickets_sorted_by_date(start_of_day, end_of_day)
+
+    open_tickets = [generate_ticket_dict(ticket) for ticket in tickets if ticket.is_open]
+    closed_tickets = [generate_ticket_dict(ticket) for ticket in tickets if not ticket.is_open]
+
+    sorted_tickets = open_tickets + closed_tickets
+
+    return jsonify(sorted_tickets)
+

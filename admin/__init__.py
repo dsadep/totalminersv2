@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from werkzeug.security import check_password_hash
 import datetime
 
@@ -21,6 +22,7 @@ from config import settings
 from logger import config_logger
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 app.config['SECRET_KEY'] = 'secretkey'
 
 app.register_blueprint(users_router)

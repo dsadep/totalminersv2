@@ -1,8 +1,10 @@
+from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import create_engine, Select, delete
+from sqlalchemy import and_, create_engine, Select, delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker, joinedload
+from admin.db.models.feedbacks import Feedback
 from werkzeug.security import generate_password_hash
 
 from admin.db.base_model import Model
@@ -127,6 +129,25 @@ def add_message_to_ticket(id: int, msg: str, sender: str):
     except:
         session.rollback()
 
+def get_tickets_sorted_by_date(date: datetime, date_end: datetime):
+    query = Select(Ticket).where(
+        and_(
+            Ticket.created_at >= date,
+            Ticket.created_at < date_end
+        )
+    )
+    result = session.execute(query)
+    return result.scalars().all()
+
+def get_feedbacks_sorted_by_date(date: datetime, date_end: datetime):
+    query = Select(Feedback).where(
+        and_(
+            Feedback.created >= date,
+            Feedback.created < date_end
+        )
+    )
+    result = session.execute(query)
+    return result.scalars().all()
 
 #
 #
