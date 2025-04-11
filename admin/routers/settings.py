@@ -1,13 +1,14 @@
 from flask import Blueprint, request, jsonify
 
 from admin.db.database import setting_get, setting_update
-from admin.utils import auth_required
+from admin.utils import admin_only, auth_required
 
 settings_router = Blueprint(name='settings_router', import_name='settings_router')
 
 
 @settings_router.get('/settings')
 @auth_required
+@admin_only
 def get_settings():
     """Получение всех настроек"""
     data = {
@@ -32,6 +33,7 @@ def get_settings():
 
 @settings_router.post('/settings/update')
 @auth_required
+@admin_only
 def update_settings():
     """Обновление настроек"""
     try:

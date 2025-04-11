@@ -1,3 +1,4 @@
+from datetime import timedelta
 import logging
 
 from flask import Blueprint, request, jsonify
@@ -5,11 +6,32 @@ from flask import Blueprint, request, jsonify
 from admin.db.database import basic_get, basic_create, basic_update, basic_get_all_asc
 from admin.db.models import User, Worker, MinerItem
 from admin.modules.headframe import headframe_api
-from admin.service import generate_user_dict, generate_miner_worker_dict, generate_miner_item_dict
+from admin.service import generate_user_dict, generate_miner_worker_dict, generate_miner_item_dict, generate_workers_dict
 from admin.utils import auth_required, HashRateTypes
 
 workers_router = Blueprint('workers_router', 'workers_router')
 
+@workers_router.get('/workers')
+@auth_required
+def get_all_workers_grouped():
+    """Возвращает всех воркеров, сгруппированных по активности."""
+    workers_db = basic_get_all_asc(Worker)
+    
+    all_workers = []
+    faulty_workers = []
+
+    for worker in workers_db:
+        worker_data = generate_workers_dict(worker)
+        all_workers.append(worker_data)
+        if not worker.is_active:
+            faulty_workers.append(worker_data)
+
+    return jsonify({
+        "all": all_workers,
+        "faulty": faulty_workers
+    }), 200
+
+                
 @workers_router.get("/workers/<int:id>/")
 @auth_required
 def get_user_workers(id):
@@ -32,6 +54,23 @@ def get_user_workers(id):
             ],
         }
     )
+
+@workers_router.post('/workers/<id>/restore')
+@auth_required
+def restore_worker(id):
+    worker = basic_get(Worker, id=id)
+    if not worker:
+        return jsonify({"error": "Worker not found"}), 404
+
+    if worker.is_active:
+        return jsonify({"message": "Worker is already active"}), 400
+
+    basic_update(worker, is_active=True)
+
+    return jsonify({
+        "message": f"Worker {worker.id_str} is now active",
+        "worker": generate_workers_dict(worker)
+    }), 200
 
 @workers_router.get("/workers/<int:worker_id>")
 @auth_required

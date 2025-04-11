@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash
 import datetime
 
 from admin.db import database
-from admin.db.database import basic_get, basic_create
+from admin.db.database import basic_get, basic_create, session
 from admin.db.models import Employee, User
 from admin.routers.billings import billings_router
 from admin.routers.buy_requests import buy_requests_router
@@ -68,7 +68,7 @@ def api_login():
     if not check_password_hash(employee.password, password):
         return jsonify({"error": "Invalid credentials"}), 401
 
-    token = generate_token(employee.email)
+    token = generate_token(employee.email, role=employee.role.value)
     return jsonify({"token": token})
 
 
@@ -85,7 +85,8 @@ def create_test_admin():
     database.create_employee(
         'admin',
         'example@example.com',
-        'qwerty21'
+        'qwerty21',
+        'admin'
     )
     return jsonify({"message": "Test admin created"})
 
@@ -155,6 +156,14 @@ def create_test_user():
             "created": user.created.strftime('%Y-%m-%d %H:%M:%S')
         }
     }), 201
+
+@app.get('/rollback')
+def rollback_session():
+    try:
+        session.rollback()
+        return jsonify({"message": "Rollback successful"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 def create_app():
     config_logger()

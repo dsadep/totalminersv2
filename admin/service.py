@@ -185,3 +185,31 @@ def generate_miner_worker_dict(worker: Worker, workers_statuses: dict) -> dict:
         'hidden': worker.hidden,
         'created': worker.created.strftime(format=settings.date_time_format),
     }
+
+def generate_workers_dict(worker) -> dict:
+    if not worker:
+        return {}
+    return {
+        'id': worker.id,
+        'id_str': worker.id_str,
+        'name': worker.name,
+        'behavior': worker.behavior,
+        'user': generate_user_dict(user=worker.user),
+        'hidden': worker.hidden,
+        'created': worker.created.strftime(format=settings.date_time_format),
+        'is_active': worker.is_active,
+    }
+
+def generate_employees_dict(employees):
+    if not employees:
+        return {}
+    return [
+        {
+            "id": e.id,
+            "username": e.username,
+            "email": e.email,
+            "role": e.role.value if e.role else None,
+            "created": e.created.strftime('%Y-%m-%d %H:%M:%S') if e.created else None
+        }
+        for e in employees
+    ]

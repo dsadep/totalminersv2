@@ -27,10 +27,11 @@ class HashRateTypes:
             self.PH: 10 ** 15,
         }.get(hash_type, 1)
 
-def generate_token(login: str) -> str:
+def generate_token(login: str, role: str) -> str:
     token = jwt.encode(
         {
             "login": login,
+            "role": role,
             "exp": datetime.now(tz=timezone.utc) + timedelta(days=7)
         },
         settings.jwt_secret,
@@ -66,6 +67,33 @@ def auth_required(func):
         return jsonify({"error": "Unauthorized"}), 401
 
     return wrapper
+
+def admin_only(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if token and token.startswith("Bearer "):
+            token = token.split("Bearer ")[1]
+        elif 'token' in session:
+            token = session.get('token')
+        else:
+            return jsonify({"error": "Unauthorized"}), 401
+
+        try:
+            decoded = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
+            role = decoded.get("role")
+            print("ROLE FROM TOKEN:", role)
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+
+        if role != 'admin':
+            return jsonify({"error": "Forbidden. Admins only."}), 403
+
+        return func(*args, **kwargs)
+    return wrapper
+
 
 
 def value_to_int(value: [str, float], decimal: int = settings.usd_decimal) -> int:

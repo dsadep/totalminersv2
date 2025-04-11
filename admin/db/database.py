@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
+from admin.service import generate_workers_dict
 from sqlalchemy import and_, create_engine, Select, delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -23,11 +24,12 @@ session = dbsession()
 #     return candidate
 #
 
-def create_employee(username, email, password) -> Employee | None:
+def create_employee(username, email, password, role) -> Employee | None:
     new_employee = Employee()
     new_employee.email = email
     new_employee.username = username
     new_employee.password = generate_password_hash(password)
+    new_employee.role = role
     session.add(new_employee)
     try:
         session.commit()
@@ -171,6 +173,9 @@ def get_feedbacks_sorted_by_date(date: datetime, date_end: datetime):
 #     session.refresh(worker)
 #     return worker
 #
+
+
+
 
 def create_db():
     Model.metadata.create_all(bind=engine)
