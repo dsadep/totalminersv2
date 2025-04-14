@@ -14,13 +14,13 @@ miners_items_categories_router = Blueprint(
 @miners_items_categories_router.get('/miners_items_categories')
 @auth_required
 def index():
-    """Получение категории товара майнинга по id."""
-    miner_item_category = basic_get(MinerItemCategory, id=id)
-    if not miner_item_category:
+    miner_item_categories = basic_get_all_asc(MinerItemCategory)
+    if not miner_item_categories:
         return jsonify({"error": "Miner Item Category not found"}), 404
-    return jsonify(generate_miner_item_category_dict(miner_item_category=miner_item_category)), 200
-
-
+    return jsonify(
+        [generate_miner_item_category_dict(miner_item_category) 
+        for miner_item_category in miner_item_categories]
+        ), 200
 
 
 @miners_items_categories_router.get('/miners_items_categories/<id>')

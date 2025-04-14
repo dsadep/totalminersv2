@@ -19,7 +19,7 @@ class User(Model):
     """
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     firstname = Column(String)
     lastname = Column(String)
     phone = Column(String, unique=True)

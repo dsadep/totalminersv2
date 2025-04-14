@@ -9,7 +9,7 @@ from ..base_model import Model
 class MinerItem(Model):
     __tablename__ = 'miner_items'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     name = Column(String)
     description = Column(String)
     hash_rate = Column(BigInteger, default=0)

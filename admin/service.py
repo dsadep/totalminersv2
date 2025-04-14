@@ -155,6 +155,7 @@ def generate_feedback_dict(feedback: Feedback) -> dict:
         'phone': feedback.phone,
         'state': feedback.state,
         'created': feedback.created.strftime(settings.date_time_format),
+        'type': feedback.type
     }
 
 
@@ -189,15 +190,21 @@ def generate_miner_worker_dict(worker: Worker, workers_statuses: dict) -> dict:
 def generate_workers_dict(worker) -> dict:
     if not worker:
         return {}
+    
+    miner_item = worker.miner_item
+
     return {
         'id': worker.id,
         'id_str': worker.id_str,
         'name': worker.name,
         'behavior': worker.behavior,
+        'hash': hash_to_str(miner_item.hash_rate) if miner_item else None,
+        'miner': f"{worker.id} - {miner_item.name}" if miner_item else None,
         'user': generate_user_dict(user=worker.user),
         'hidden': worker.hidden,
         'created': worker.created.strftime(format=settings.date_time_format),
         'is_active': worker.is_active,
+        'more': miner_item.description if miner_item else None
     }
 
 def generate_employees_dict(employees):
@@ -213,3 +220,17 @@ def generate_employees_dict(employees):
         }
         for e in employees
     ]
+
+def generate_payments_dict(payment):
+    if not payment:
+        return {}
+    return {
+        'id': payment.id,
+        'type': payment.type,
+        'currency': payment.currency,
+        'user_id': payment.user_id,
+        'value': payment.value,
+        'date': payment.date,
+        'date_time': payment.date_time,
+        'created': payment.created,
+    }

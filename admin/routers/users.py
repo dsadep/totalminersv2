@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from admin.db.database import basic_get_all_asc, basic_update, basic_get
+from admin.db.database import basic_get_all_asc, basic_update, basic_get, get_top_users_by_hashrate
 from admin.db.models import User
 from admin.service import generate_user_dict
 from admin.utils import auth_required
@@ -65,3 +65,8 @@ def update_user(id):
         telegram=data.get("telegram"),
     )
     return jsonify({"message": "Пользователь обновлен", "user": generate_user_dict(user)})
+
+
+@users_router.get('/users/get/top20')
+def top20_users():
+    return jsonify(get_top_users_by_hashrate())

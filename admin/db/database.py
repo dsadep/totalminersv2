@@ -1,8 +1,14 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
+from admin.db.models.billings import Billing
+from admin.db.models.billings_payments import BillingPayment
+from admin.db.models.payments import Payment
+from admin.db.models.users import User
+from admin.db.models.workers import Worker
 from admin.service import generate_workers_dict
-from sqlalchemy import and_, create_engine, Select, delete
+from admin.utils import hash_to_str
+from sqlalchemy import and_, create_engine, Select, delete, func, desc, nulls_last
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker, joinedload
 from admin.db.models.feedbacks import Feedback
@@ -151,7 +157,190 @@ def get_feedbacks_sorted_by_date(date: datetime, date_end: datetime):
     result = session.execute(query)
     return result.scalars().all()
 
-#
+
+def get_top_users_by_hashrate(limit=20):
+    subq = (
+        session.query(
+            Worker.user_id,
+            func.sum(MinerItem.hash_rate).label("total_hashrate")
+        )
+        .join(MinerItem, Worker.miner_item_id == MinerItem.id)
+        .filter(Worker.is_active)
+        .group_by(Worker.user_id)
+        .subquery()
+    )
+
+    q = (
+        session.query(
+            User.id, User.firstname, User.miner_name,
+            func.coalesce(subq.c.total_hashrate, 0).label("total_hashrate")
+        )
+        .outerjoin(subq, User.id == subq.c.user_id)
+        .order_by(desc(subq.c.total_hashrate).nullslast(), User.id)
+        .limit(limit)
+    )
+
+    return [dict(r._mapping) for r in q.all()]
+
+def amount_of_new_users():
+    one_month_ago = datetime.now() - timedelta(days=30)
+
+    query = Select(func.count()).select_from(User).where(
+        User.created >= one_month_ago
+    )
+
+    result = session.execute(query)
+    return result.scalar()
+
+def get_non_payments():
+    five_days_ago = datetime.now() - timedelta(days=5)
+
+    overdue_billings = (
+        session.query(Billing)
+        .options(joinedload(Billing.user))
+        .filter(
+            Billing.type == 'hosting',
+            Billing.state != 'completed',
+            Billing.created <= five_days_ago
+        )
+        .all()
+    )
+
+    result = []
+    for billing in overdue_billings:
+        payment_link = (
+            session.query(BillingPayment)
+            .filter(BillingPayment.billing_id == billing.id)
+            .first()
+        )
+
+        if not payment_link:
+            result.append({
+                "billing_id": billing.id,
+                "user_id": billing.user.id if billing.user else None,
+                "user_name": f"{billing.user.firstname} {billing.user.lastname}" if billing.user else "Unknown",
+                "created": billing.created.strftime("%Y-%m-%d %H:%M:%S"),
+                "status": billing.state,
+                "value": billing.value,
+                "currency": billing.currency
+            })
+
+    return(result)
+
+def stop_mining_for_user_logic(user_id: int) -> int:
+    workers = session.query(Worker).filter(Worker.user_id == user_id).all()
+    for worker in workers:
+        worker.is_active = False
+    session.commit()
+    return len(workers)
+
+def resume_mining_for_user_logic(user_id: int) -> int:
+    workers = session.query(Worker).filter(Worker.user_id == user_id).all()
+    for worker in workers:
+        worker.is_active = True
+    session.commit()
+    return len(workers)
+
+def get_settings_value(key: str) -> str:
+    result = session.query(Setting).filter(Setting.key == key).first()
+    return result.value if result else "0"
+
+def get_main_page_stats(days: int | None):
+    date_ago = datetime.now() - timedelta(days=days)
+    online_workers = session.query(Worker).filter(Worker.is_active == True).all()
+    offline_workers = session.query(Worker).filter(Worker.is_active == False).all()
+    total_hashrate = (
+        session.query(func.sum(MinerItem.hash_rate))
+        .outerjoin(Worker, Worker.miner_item_id == MinerItem.id)
+        .scalar()
+    )
+    electricity_cost = float(get_settings_value('electricity_cost'))
+    hashrate_kw = float(get_settings_value('hash_rate_electricity_consumption'))
+
+    kw = float(total_hashrate) * hashrate_kw / 1e12
+    electricity_price = round(kw * electricity_cost, 2)
+    if days != 0:
+        hosting_income = (
+            session.query(func.sum(Billing.value_usd))
+            .filter(
+                Billing.type == 'hosting',
+                Billing.state == 'completed',
+                Billing.created >= date_ago
+            )
+            .scalar()
+        ) or 0
+        hosting_profit = round(hosting_income - electricity_price)
+
+        sales = (
+            session.query(func.sum(Billing.value_usd))
+            .filter(
+                Billing.type == 'buy_request',
+                Billing.state == 'completed',
+                Billing.created >= date_ago
+            )
+            .scalar()
+        ) or 0
+    else:
+        hosting_income = (
+            session.query(func.sum(Billing.value_usd))
+            .filter(
+                Billing.type == 'hosting',
+                Billing.state == 'completed',
+            )
+            .scalar()
+        ) or 0
+        hosting_profit = round(hosting_income - electricity_price)
+
+        sales = (
+            session.query(func.sum(Billing.value_usd))
+            .filter(
+                Billing.type == 'buy_request',
+                Billing.state == 'completed',
+            )
+            .scalar()
+        ) or 0
+
+
+    if days == 0:
+        feedback_requests = session.query(Feedback).all()
+        new_tickets = session.query(Ticket).all()
+        client_income = session.query(func.sum(Payment.value)).filter(
+            Payment.type == 'reward',
+        ).scalar() or 0
+        client_expence = session.query(func.sum(Payment.value)).filter(
+            Payment.type == 'hosting'
+        ).scalar() or 0
+    else:
+        feedback_requests = session.query(Feedback).filter(Feedback.created >= date_ago).all()
+        new_tickets = session.query(Ticket).filter(Ticket.created_at >= date_ago).all()
+        client_income = session.query(func.sum(Payment.value)).filter(
+            Payment.type == 'reward',
+            Payment.created >= date_ago
+        ).scalar() or 0
+        client_expence = session.query(func.sum(Payment.value)).filter(
+            Payment.type == 'hosting',
+            Payment.created >= date_ago
+        ).scalar() or 0
+
+    return {
+        'online_workers': len(online_workers),
+        'offline_workers': len(offline_workers),
+        'total_hashrate': hash_to_str(total_hashrate) if total_hashrate != 0 else hash_to_str(0),
+        'kw': round(kw, 2),
+        'electricity_cost': electricity_price,
+        'feedbacks': len(feedback_requests),
+        'tickets': len(new_tickets),
+        'hosting_profit': hosting_profit,
+        'sales_total': round(float(sales), 2),
+        'client_income': round(float(client_income), 2),
+        'client_expence': round(abs(float(client_expence)), 2),
+        'client_profit': round(float(client_income)-abs(float(client_expence)), 2)
+    }
+    
+    #offline_workers 
+    #hash
+
+
 #
 # def create_worker(
 #         item_name,

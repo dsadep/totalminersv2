@@ -9,6 +9,9 @@ class FeedbackStates:
     WAIT = 'wait'
     CLOSE = 'close'
 
+class FeedbackTypes:
+    BUISNESS = 'Готовый бизнес'
+    WHOLESALE = 'Опт'
 
 class Feedback(Model):
     __tablename__ = 'feedbacks'
@@ -18,3 +21,4 @@ class Feedback(Model):
     phone = Column(String(length=32))
     state = Column(String(length=16))
     created = Column(DateTime, default=datetime.datetime.now)
+    type = Column(String(length=16))
