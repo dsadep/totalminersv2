@@ -65,7 +65,7 @@ def page_delete(id: int):
     return jsonify({"message": "Miner Item Category deleted successfully"}), 200
 
 
-@miners_items_categories_router.post('/miners_items_categories/create')
+@miners_items_categories_router.post('/miners_items_categories/create/new')
 @auth_required
 def create_post():
     """Создание новой категории товара майнинга."""

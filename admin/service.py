@@ -204,7 +204,8 @@ def generate_workers_dict(worker) -> dict:
         'hidden': worker.hidden,
         'created': worker.created.strftime(format=settings.date_time_format),
         'is_active': worker.is_active,
-        'more': miner_item.description if miner_item else None
+        'more': miner_item.description if miner_item else None,
+        'mode': 'n/a'
     }
 
 def generate_employees_dict(employees):

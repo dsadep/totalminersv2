@@ -31,6 +31,7 @@ class BillingService:
             id: int,
             data: str,
     ):
+        print(data)
         billing = await BaseService().get(self.model, user_id=user.id, id=id)
         await BaseService().update(billing, payment_data=data, state=BillingStates.CONFIRMATION)
         return {
