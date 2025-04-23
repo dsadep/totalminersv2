@@ -3,7 +3,7 @@ from typing import Optional
 
 from admin.db.models.billings import Billing
 from admin.db.models.billings_payments import BillingPayment
-from admin.db.models.payments import Payment
+from admin.db.models.payments import Payment, PaymentCurrencies, PaymentTypes
 from admin.db.models.users import User
 from admin.db.models.workers import Worker
 from admin.service import generate_workers_dict
@@ -158,29 +158,63 @@ def get_feedbacks_sorted_by_date(date: datetime, date_end: datetime):
     return result.scalars().all()
 
 
-def get_top_users_by_hashrate(limit=20):
-    subq = (
+def get_top_users_by_hashrate(limit=20, btc_usd_rate=85000):
+
+    hashrate_subq = (
         session.query(
-            Worker.user_id,
+            Worker.user_id.label("user_id"),
             func.sum(MinerItem.hash_rate).label("total_hashrate")
         )
         .join(MinerItem, Worker.miner_item_id == MinerItem.id)
-        .filter(Worker.is_active)
+        .filter(Worker.is_active == True)
         .group_by(Worker.user_id)
+        .subquery()
+    )
+
+    devices_subq = (
+        session.query(
+            Worker.user_id.label("user_id"),
+            func.count(Worker.id).label("device_count")
+        )
+        .filter(Worker.is_active == True)
+        .group_by(Worker.user_id)
+        .subquery()
+    )
+
+    # Подзапрос: чистая прибыль BTC (сумма reward)
+    profit_btc_subq = (
+        session.query(
+            Payment.user_id.label("user_id"),
+            func.sum(Payment.value).label("reward_btc_satoshi")
+        )
+        .filter(
+            Payment.type == PaymentTypes.REWARD,
+            Payment.currency == PaymentCurrencies.BTC
+        )
+        .group_by(Payment.user_id)
         .subquery()
     )
 
     q = (
         session.query(
-            User.id, User.firstname, User.miner_name,
-            func.coalesce(subq.c.total_hashrate, 0).label("total_hashrate")
+            User.id,
+            User.firstname,
+            User.miner_name,
+            func.coalesce(hashrate_subq.c.total_hashrate, 0).label("total_hashrate"),
+            func.coalesce(devices_subq.c.device_count, 0).label("device_count"),
+            func.coalesce(profit_btc_subq.c.reward_btc_satoshi, 0).label("reward_btc_satoshi"),
+            (func.coalesce(profit_btc_subq.c.reward_btc_satoshi, 0) / 1e8).label("reward_btc"),
+            (func.coalesce(profit_btc_subq.c.reward_btc_satoshi, 0) / 1e8 * btc_usd_rate).label("reward_usd")
         )
-        .outerjoin(subq, User.id == subq.c.user_id)
-        .order_by(desc(subq.c.total_hashrate).nullslast(), User.id)
+        .outerjoin(hashrate_subq, User.id == hashrate_subq.c.user_id)
+        .outerjoin(devices_subq, User.id == devices_subq.c.user_id)
+        .outerjoin(profit_btc_subq, User.id == profit_btc_subq.c.user_id)
+        .order_by(desc(hashrate_subq.c.total_hashrate).nullslast(), User.id)
         .limit(limit)
     )
 
-    return [dict(r._mapping) for r in q.all()]
+    result = [dict(row._mapping) for row in q.all()]
+    return result
 
 def amount_of_new_users():
     one_month_ago = datetime.now() - timedelta(days=30)

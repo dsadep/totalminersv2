@@ -1,3 +1,4 @@
+import requests
 import jwt
 from datetime import datetime, timedelta, timezone
 from functools import wraps
@@ -131,3 +132,10 @@ def hash_to_str(value: int) -> str:
     else:
         result = f'{result} Hash/s'
     return result
+
+def get_btc_usd_rate():
+    url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+    response = requests.get(url, timeout=5)
+    response.raise_for_status()
+    data = response.json()
+    return data["bitcoin"]["usd"]

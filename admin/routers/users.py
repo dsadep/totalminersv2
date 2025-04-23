@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 from admin.db.database import basic_get_all_asc, basic_update, basic_get, get_top_users_by_hashrate
 from admin.db.models import User
 from admin.service import generate_user_dict
-from admin.utils import auth_required
+from admin.utils import auth_required, get_btc_usd_rate
 
 users_router = Blueprint(name='users_router', import_name='users_router')
 
@@ -69,4 +69,6 @@ def update_user(id):
 
 @users_router.get('/users/get/top20')
 def top20_users():
-    return jsonify(get_top_users_by_hashrate())
+    btc_usd_rate = get_btc_usd_rate()
+    top20 = get_top_users_by_hashrate(btc_usd_rate=btc_usd_rate)
+    return jsonify(top20), 200

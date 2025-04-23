@@ -234,4 +234,6 @@ def generate_payments_dict(payment):
         'date': payment.date,
         'date_time': payment.date_time,
         'created': payment.created,
+        'gateway': 'n/a',
+        'net': 'n/a',
     }
